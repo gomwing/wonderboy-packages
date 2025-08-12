@@ -2,3 +2,7 @@ build
 **/pkg
 **/src
 **/__pycache__
+.vs/
+.venv/
+uv.lock
+
