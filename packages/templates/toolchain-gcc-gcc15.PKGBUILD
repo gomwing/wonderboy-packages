@@ -42,7 +42,7 @@ sha256sums=(
 	'SKIP'
 )
 
-. "/wf/config/runtime-env-vars.sh"
+. "../../config/runtime-env-vars.sh"
 
 prepare() {
 	mkdir -p "gcc-build"

@@ -23,14 +23,14 @@ def cmd_build_bootstrap(ctx, args):
         if target_parts[0] == "windows":
             packages.append("runtime-msys2-shell")
 
-        run_args = ["rm", "-r", f"/wf/build/bootstrap/*-{bootstrap_suffix}.tar.gz", ";",
-                "mkdir", "-p", "/wf/build/bootstrap", "&&",
+        run_args = ["rm", "-r", f"build/bootstrap/*-{bootstrap_suffix}.tar.gz", ";",
+                "mkdir", "-p", "build/bootstrap", "&&",
                 "sudo", "pacman", "-Syu", "&&",
                 "sudo", "pacman", "-S", "--noconfirm", ] + packages + ["&&",
                 "cd", "/opt/wonderful", "&&",
                 "rm", "-r", "pacman/cache", "&&",
                 "rm", "pacman/pacman.log", "&&",
-                "tar", "czvf", f"/wf/build/bootstrap/wf-bootstrap-{bootstrap_suffix}.tar.gz", "."]
+                "tar", "czvf", f"build/bootstrap/wf-bootstrap-{bootstrap_suffix}.tar.gz", "."]
 
         if target_parts[0] != "linux":
             run_args.remove("sudo")

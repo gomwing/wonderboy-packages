@@ -2,16 +2,20 @@
 #
 # SPDX-FileContributor: Adrian "asie" Siekierka, 2023
 
+import os
 from pathlib import Path
 import re
 import subprocess
 import tarfile
 
 def resolve_package_path(name, target):
-    target_parts = target.split("/")
+    target_parts = os.path.split(target)  #.split("/")
+    print(f"패스 문자열:  {name, target}")
     package_path = Path("packages") / name
     for candidate_path in [package_path, package_path / target_parts[0], package_path / "other", package_path / "any"]:
+        print(f"처리 :  {candidate_path}")
         if (candidate_path / "PKGBUILD").exists():
+            print(f"발견 :  {candidate_path}")
             return candidate_path
     return None
 
@@ -92,8 +96,13 @@ class PackageSourceCache:
         return self.package_names
 
     def get_package_by_path(self, name, path):
+        cwd=os.getcwd()
         if path not in self.packages:
-            result = self.env.run(["cd", str(self.env.root / str(path)), "&&", "makepkg", "--printsrcinfo"], check=True, stdout=subprocess.PIPE, skip_package_sync=True)
+            #os.chdir(cwd)
+            print(f"get_package_by_path: {str(path)}")
+            os.chdir(str(path))
+            print(f"curdir:  {str(path)}")
+            result = self.env.run([ "makepkg", "--printsrcinfo"], check=True, stdout=subprocess.PIPE, skip_package_sync=True)
             package = {}
             for line in result.stdout.decode('utf-8').splitlines():
                 parts = list([l.strip() for l in line.strip().split("=", maxsplit=1)])
@@ -123,6 +132,7 @@ class PackageSourceCache:
 
             postprocess_package_keys(package, extra_keys=["names"])
             self.packages[path] = package
+        os.chdir(cwd)    
         return self.packages[path]
 
     def get_package_by_name(self, name, target):

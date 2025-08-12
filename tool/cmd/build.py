@@ -2,6 +2,7 @@
 #
 # SPDX-FileContributor: Adrian "asie" Siekierka, 2023
 
+import os
 from .mirror import clean_unused_packages
 from ..package import PackageBinaryCache, PackageSourceCache, resolve_package_path
 from pathlib import Path
@@ -58,10 +59,14 @@ def cmd_build(ctx, args):
 
     for package, target in tqdm(package_pairs):
         tqdm.write(colored(f"[*] Building {package} for {target}...", attrs=["bold"]))
+        cwd=os.getcwd()
+        print(f"cwd:  {str(cwd)}")
         env = ctx.preferred_environment if target == "any" else ctx.environments[target]
-        result = env.run(["cd", str(env.root / str(resolve_package_path(package, env.path))), "&&", "makepkg", "-C", "--clean", "--syncdeps", "--force", "--noconfirm", "--skippgpcheck", package], check=True)
+        os.chdir(str(resolve_package_path(package, env.path)))
+        result = env.run(["makepkg", "-C", "--clean", "--syncdeps", "--force", "--noconfirm", "--skippgpcheck", package], check=True)
+        os.chdir(cwd)
         package_names = source_cache.get_package_by_name(package, target)["names"]
-
+        os.chdir(cwd)
         for package_name in package_names:
             repo_updates[env.path].append(package_name)
         if target == "any":
@@ -92,8 +97,11 @@ def cmd_build(ctx, args):
         env = ctx.preferred_environment
 
         old_filenames = list([p["filename"] for p in package_caches[target].get_packages().values()])
-
-        run_args = ["cd", str(env.root / str(target_dir)), "&&", "repo-add"]
+        cwd=os.getcwd()
+        print(f"cwd:  {str(cwd)}")
+        os.chdir(str(target_dir))
+        print(f"target_dir:  {str(target_dir)}")
+        run_args = ["repo-add"]
         if not args.keep:
             run_args.append("-R")
         run_args.append("wonderful.db.tar.gz")
@@ -114,3 +122,5 @@ def cmd_build(ctx, args):
                     run_args.append(fn)
                     added_files[fn] = True
         result = env.run(run_args, check=True, skip_package_sync=True)
+        os.chdir(cwd)
+        

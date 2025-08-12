@@ -36,7 +36,8 @@ class NativeWindowsEnvironment(Environment):
     def run(self, args, **kwargs):
         # kwargs["shell"] = True
         clean_custom_keys(kwargs)
-        return subprocess.run(["sh", "-c", " ".join(args)], **kwargs)
+        print(f"원본 문자열: {"\'"+" ".join(args)+"\'"}")
+        return subprocess.run(["bash", "-c", " ".join(args)], **kwargs)
         
 class NativeLinuxEnvironment(Environment):
     def __init__(self, arch):
@@ -64,6 +65,7 @@ class ContainerLinuxEnvironment(Environment):
                 cwd=f"containers/{self.container_name}")
             self.container_built = True
         cwd = os.getcwd()
+        print(f"cwd:  {str(cwd)}")
         cmd = " ".join(args)
         cmd = "su -c '" + cmd + "'"
         if not ("as_root" in kwargs and kwargs["as_root"]):
